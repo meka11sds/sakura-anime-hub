@@ -1,0 +1,576 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Watchlist | Sakura</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg: #120b13;
+            --panel: #211424;
+            --card: #2a1a2d;
+            --text: #ffe3eb;
+            --muted: #bda6b9;
+            --accent: #eb4aa3;
+            --accent2: #a92de0;
+            --border: #493047;
+            --input: #2c1e30;
+        }
+
+        body.theme-light {
+            --bg: #fff1f6;
+            --panel: #fff9fc;
+            --card: #ffffff;
+            --text: #503449;
+            --muted: #93768a;
+            --accent: #d779a7;
+            --accent2: #c58acb;
+            --border: #efd0df;
+            --input: #fff7fa;
+        }
+
+        body.theme-green {
+            --bg: #eaf5ed;
+            --panel: #f7fcf8;
+            --card: #ffffff;
+            --text: #244733;
+            --muted: #668875;
+            --accent: #398e61;
+            --accent2: #6ab78a;
+            --border: #c6dfce;
+            --input: #f0f8f2;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background .3s, color .3s;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        #sakura-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .site-header {
+            position: relative;
+            z-index: 2;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            font-size: 23px;
+        }
+
+        .brand-name {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .brand-subtitle {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--muted);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 11px 17px;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .nav-link:hover { border-color: var(--accent); }
+
+        .nav-primary,
+        .primary-button {
+            background: linear-gradient(110deg, var(--accent), var(--accent2));
+            color: white;
+            border: none;
+            font-weight: 700;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: auto;
+            padding: 48px 24px 70px;
+        }
+
+        .page-intro {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 32px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .page-intro h1 {
+            font-size: clamp(28px, 4vw, 42px);
+            margin: 12px 0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(110deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .page-intro p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .watch-section {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 26px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .count {
+            color: var(--accent);
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+            gap: 15px;
+        }
+
+        .watch-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .watch-item:hover { border-color: var(--accent); }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .item-form {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 115px;
+        }
+
+        .episode-field {
+            flex: 0 0 85px;
+            min-width: 75px;
+        }
+
+        .field label {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .field select,
+        .field input {
+            width: 100%;
+            padding: 11px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--input);
+            color: var(--text);
+            font: inherit;
+            font-size: 12px;
+        }
+
+        .primary-button {
+            padding: 12px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .primary-button:hover { filter: brightness(1.12); }
+
+        .empty {
+            color: var(--muted);
+            font-size: 13px;
+            padding: 20px 0;
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 28px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .header-inner { justify-content: center; }
+            main { padding: 30px 16px; }
+            .watch-section { padding: 18px; }
+            .page-intro { padding: 22px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+            #sakura-canvas { display: none; }
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+
+<canvas id="sakura-canvas"></canvas>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a href="/search-page" class="brand">
+            <div class="brand-icon">🌸</div>
+            <div>
+                <div class="brand-name">SAKURA</div>
+                <div class="brand-subtitle">ANIME & MOVIE HUB</div>
+            </div>
+        </a>
+
+        <nav>
+            <a href="/search-page" class="nav-link">⌕ Search</a>
+            <a href="/profile" class="nav-link nav-primary">⚙ Profile</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="page-intro">
+        <div class="eyebrow">✦ YOUR PERSONAL COLLECTION ✦</div>
+        <h1>My <span class="gradient-text">Watchlist</span></h1>
+        <p>Organize your favorite stories, track episodes and manage your viewing progress.</p>
+    </section>
+
+    <section class="watch-section">
+        <div class="section-header">
+            <h2>👀 Currently Watching</h2>
+            <span class="count" th:text="${#lists.size(watchingList)} + ' titles'">0 titles</span>
+        </div>
+
+        <p class="empty" th:if="${#lists.isEmpty(watchingList)}">Nothing here yet. Your next favorite story is waiting.</p>
+
+        <div class="items-grid" th:unless="${#lists.isEmpty(watchingList)}">
+            <article class="watch-item" th:each="item : ${watchingList}">
+                <div class="item-title" th:text="${item.title}">Anime title</div>
+
+                <form class="item-form" th:action="@{/watchlist/add}" method="post">
+                    <input type="hidden" name="showId" th:value="${item.showId}">
+                    <input type="hidden" name="title" th:value="${item.title}">
+
+                    <div class="field episode-field">
+                        <label>Episode</label>
+                        <input type="number" name="currentEpisode"
+                               th:value="${item.currentEpisode}" min="1">
+                    </div>
+
+                    <div class="field">
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="watching" selected>Watching</option>
+                            <option value="planned">Plan to Watch</option>
+                            <option value="completed">Completed</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="primary-button">Save</button>
+                </form>
+            </article>
+        </div>
+    </section>
+
+    <section class="watch-section">
+        <div class="section-header">
+            <h2>📌 Plan to Watch</h2>
+            <span class="count" th:text="${#lists.size(plannedList)} + ' titles'">0 titles</span>
+        </div>
+
+        <p class="empty" th:if="${#lists.isEmpty(plannedList)}">Your planned list is empty.</p>
+
+        <div class="items-grid" th:unless="${#lists.isEmpty(plannedList)}">
+            <article class="watch-item" th:each="item : ${plannedList}">
+                <div class="item-title" th:text="${item.title}">Anime title</div>
+
+                <form class="item-form" th:action="@{/watchlist/add}" method="post">
+                    <input type="hidden" name="showId" th:value="${item.showId}">
+                    <input type="hidden" name="title" th:value="${item.title}">
+                    <input type="hidden" name="currentEpisode" th:value="${item.currentEpisode}">
+
+                    <div class="field">
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="watching">Watching</option>
+                            <option value="planned" selected>Plan to Watch</option>
+                            <option value="completed">Completed</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="primary-button">Move</button>
+                </form>
+            </article>
+        </div>
+    </section>
+
+    <section class="watch-section">
+        <div class="section-header">
+            <h2>✅ Completed</h2>
+            <span class="count" th:text="${#lists.size(completedList)} + ' titles'">0 titles</span>
+        </div>
+
+        <p class="empty" th:if="${#lists.isEmpty(completedList)}">No completed titles yet.</p>
+
+        <div class="items-grid" th:unless="${#lists.isEmpty(completedList)}">
+            <article class="watch-item" th:each="item : ${completedList}">
+                <div class="item-title" th:text="${item.title}">Anime title</div>
+
+                <form class="item-form" th:action="@{/watchlist/add}" method="post">
+                    <input type="hidden" name="showId" th:value="${item.showId}">
+                    <input type="hidden" name="title" th:value="${item.title}">
+                    <input type="hidden" name="currentEpisode" th:value="${item.currentEpisode}">
+
+                    <div class="field">
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="watching">Watching</option>
+                            <option value="planned">Plan to Watch</option>
+                            <option value="completed" selected>Completed</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="primary-button">Move</button>
+                </form>
+            </article>
+        </div>
+    </section>
+
+    <section class="watch-section">
+        <div class="section-header">
+            <h2>❌ Dropped</h2>
+            <span class="count" th:text="${#lists.size(droppedList)} + ' titles'">0 titles</span>
+        </div>
+
+        <p class="empty" th:if="${#lists.isEmpty(droppedList)}">No dropped titles.</p>
+
+        <div class="items-grid" th:unless="${#lists.isEmpty(droppedList)}">
+            <article class="watch-item" th:each="item : ${droppedList}">
+                <div class="item-title" th:text="${item.title}">Anime title</div>
+
+                <form class="item-form" th:action="@{/watchlist/add}" method="post">
+                    <input type="hidden" name="showId" th:value="${item.showId}">
+                    <input type="hidden" name="title" th:value="${item.title}">
+                    <input type="hidden" name="currentEpisode" th:value="${item.currentEpisode}">
+
+                    <div class="field">
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="watching">Watching</option>
+                            <option value="planned">Plan to Watch</option>
+                            <option value="completed">Completed</option>
+                            <option value="dropped" selected>Dropped</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="primary-button">Move</button>
+                </form>
+            </article>
+        </div>
+    </section>
+</main>
+
+<footer>
+    Sakura Anime Hub © 2026
+    <p>Every story deserves a place in your collection.</p>
+</footer>
+
+<script>
+    const validThemes = ['theme-dark', 'theme-light', 'theme-green'];
+
+    function applySavedTheme() {
+        let saved = localStorage.getItem('sakura_theme');
+
+        if (!saved) {
+            const old = localStorage.getItem('sakuraTheme');
+            saved = old ? 'theme-' + old : 'theme-dark';
+        }
+
+        if (!validThemes.includes(saved)) {
+            saved = 'theme-dark';
+        }
+
+        document.body.classList.remove(...validThemes);
+        document.body.classList.add(saved);
+        localStorage.setItem('sakura_theme', saved);
+    }
+
+    applySavedTheme();
+
+    const canvas = document.getElementById('sakura-canvas');
+    const ctx = canvas.getContext('2d');
+    const petals = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 28; i++) {
+        petals.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 5 + 4,
+            speed: Math.random() * 0.8 + 0.3,
+            drift: Math.random() * 0.8 - 0.4,
+            rotation: Math.random() * Math.PI * 2
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const color = document.body.classList.contains('theme-green')
+            ? '#83cba1'
+            : '#f2a2c8';
+
+        ctx.fillStyle = color;
+
+        petals.forEach(p => {
+            p.y += p.speed;
+            p.x += p.drift;
+            p.rotation += 0.008;
+
+            if (p.y > canvas.height + 20) {
+                p.y = -20;
+                p.x = Math.random() * canvas.width;
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.globalAlpha = 0.35;
+
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size / 2, p.size, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        animate();
+    }
+</script>
+
+</body>
+</html>

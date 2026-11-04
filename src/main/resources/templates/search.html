@@ -1,0 +1,543 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sakura | Discover</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg: #120b13;
+            --panel: #211424;
+            --card: #2a1a2d;
+            --text: #ffe3eb;
+            --muted: #bda6b9;
+            --accent: #eb4aa3;
+            --accent2: #a92de0;
+            --border: #493047;
+            --input: #2c1e30;
+        }
+
+        body.theme-light {
+            --bg: #fff1f6;
+            --panel: #fff9fc;
+            --card: #ffffff;
+            --text: #503449;
+            --muted: #93768a;
+            --accent: #d779a7;
+            --accent2: #c58acb;
+            --border: #efd0df;
+            --input: #fff7fa;
+        }
+
+        body.theme-green {
+            --bg: #eaf5ed;
+            --panel: #f7fcf8;
+            --card: #ffffff;
+            --text: #244733;
+            --muted: #668875;
+            --accent: #398e61;
+            --accent2: #6ab78a;
+            --border: #c6dfce;
+            --input: #f0f8f2;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background .3s, color .3s;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        #sakura-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .site-header {
+            position: relative;
+            z-index: 2;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            font-size: 23px;
+        }
+
+        .brand-name {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .brand-subtitle {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--muted);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 11px 17px;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .nav-link:hover {
+            border-color: var(--accent);
+        }
+
+        .nav-primary, .primary-button {
+            background: linear-gradient(110deg, var(--accent), var(--accent2));
+            color: white;
+            border: none;
+            font-weight: 700;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: auto;
+            padding: 60px 24px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 3px;
+            font-weight: 800;
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 58px);
+            line-height: 1.15;
+            margin: 20px auto;
+            max-width: 850px;
+            letter-spacing: -2px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(110deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+            max-width: 740px;
+            margin: 35px auto 0;
+        }
+
+        .search-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 18px 20px;
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            font: inherit;
+            outline: none;
+        }
+
+        .search-form input:focus {
+            border-color: var(--accent);
+        }
+
+        .primary-button {
+            padding: 15px 26px;
+            border-radius: 14px;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+
+        .section-heading {
+            margin: 40px 0 25px;
+            font-size: 25px;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+            gap: 24px;
+        }
+
+        .anime-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform .25s, border-color .25s;
+        }
+
+        .anime-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .poster {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .no-poster {
+            height: 320px;
+            display: grid;
+            place-items: center;
+            background: var(--input);
+            color: var(--muted);
+        }
+
+        .card-content { padding: 20px; }
+
+        .anime-title {
+            display: block;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .anime-title:hover { color: var(--accent); }
+
+        .summary {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+            max-height: 110px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .details-link {
+            display: inline-block;
+            margin-bottom: 16px;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .watchlist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .watchlist-form select {
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--input);
+            color: var(--text);
+            border-radius: 10px;
+        }
+
+        .empty {
+            padding: 45px;
+            text-align: center;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            border-radius: 18px;
+            color: var(--muted);
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 28px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media(max-width: 600px) {
+            .header-inner { justify-content: center; }
+            .search-form { flex-direction: column; }
+            .hero h1 { letter-spacing: -1px; }
+            main { padding: 40px 16px; }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+            #sakura-canvas { display: none; }
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+
+<canvas id="sakura-canvas"></canvas>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a href="/search-page" class="brand">
+            <div class="brand-icon">🌸</div>
+            <div>
+                <div class="brand-name">SAKURA</div>
+                <div class="brand-subtitle">ANIME & MOVIE HUB</div>
+            </div>
+        </a>
+
+        <nav>
+            <a href="/watchlist" class="nav-link">♡ My Watchlist</a>
+            <a href="/profile" class="nav-link nav-primary">⚙ Profile</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="eyebrow">✦ YOUR PERSONAL WATCH UNIVERSE ✦</div>
+
+        <h1>
+            Discover your next
+            <span class="gradient-text">favorite story.</span>
+        </h1>
+
+        <p>
+            Explore anime and series, discover new favorites
+            and build your own watchlist.
+        </p>
+
+        <form class="search-form" th:action="@{/search-page}" method="get">
+            <input type="text"
+                   name="q"
+                   placeholder="Search anime or series..."
+                   th:value="${param.q}"
+                   required>
+
+            <button class="primary-button" type="submit">
+                🔍 Search
+            </button>
+        </form>
+    </section>
+
+    <section th:if="${results != null}">
+        <h2 class="section-heading">
+            Search <span class="gradient-text">Results</span>
+        </h2>
+
+        <div class="results" th:if="${!results.isEmpty()}">
+            <article class="anime-card" th:each="item : ${results}">
+
+                <img class="poster"
+                     th:if="${item['show']['image'] != null}"
+                     th:src="${item['show']['image']['original'] != null ? item['show']['image']['original'] : item['show']['image']['medium']}"
+                     alt="Poster">
+
+                <div class="no-poster"
+                     th:unless="${item['show']['image'] != null}">
+                    🌸 No poster available
+                </div>
+
+                <div class="card-content">
+                    <a class="anime-title"
+                       th:href="${item['show']['url']}"
+                       th:text="${item['show']['name']}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Anime Title
+                    </a>
+
+
+                    <div class="summary"
+                         th:text="${item['show']['summary'] != null ? item['show']['summary'].replaceAll('<[^>]*>', '') : 'Description is not available.'}">
+                    </div>
+
+
+                    <a class="details-link"
+                       th:href="@{/movie-details(id=${item['show']['id']})}">
+                        View Details →
+                    </a>
+
+                    <form class="watchlist-form"
+                          th:action="@{/watchlist/add}"
+                          method="post">
+
+                        <input type="hidden"
+                               name="showId"
+                               th:value="${item['show']['id']}">
+
+                        <input type="hidden"
+                               name="title"
+                               th:value="${item['show']['name']}">
+
+                        <select name="status">
+                            <option value="planned">📌 Plan to Watch</option>
+                            <option value="watching">👀 Watching</option>
+                            <option value="completed">✅ Completed</option>
+                            <option value="dropped">❌ Dropped</option>
+                        </select>
+
+                        <button type="submit" class="primary-button">
+                            + Add to Watchlist
+                        </button>
+                    </form>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty" th:if="${results.isEmpty()}">
+            No results found. Try another title 🌸
+        </div>
+    </section>
+</main>
+
+<footer>
+    Sakura Anime Hub © 2026
+    <p>Discover, organize and enjoy your favorite titles.</p>
+</footer>
+
+<script>
+    // Same theme key as profile and watchlist.
+    const validThemes = ['theme-dark', 'theme-light', 'theme-green'];
+
+    function applySavedTheme() {
+        let saved = localStorage.getItem('sakura_theme');
+
+        // Migrate the old search-page setting.
+        if (!saved) {
+            const old = localStorage.getItem('sakuraTheme');
+            saved = old ? 'theme-' + old : 'theme-dark';
+        }
+
+        if (!validThemes.includes(saved)) {
+            saved = 'theme-dark';
+        }
+
+        document.body.classList.remove(...validThemes);
+        document.body.classList.add(saved);
+        localStorage.setItem('sakura_theme', saved);
+        return saved;
+    }
+
+    applySavedTheme();
+
+    const canvas = document.getElementById('sakura-canvas');
+    const ctx = canvas.getContext('2d');
+    const petals = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 28; i++) {
+        petals.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 5 + 4,
+            speed: Math.random() * 0.8 + 0.3,
+            drift: Math.random() * 0.8 - 0.4,
+            rotation: Math.random() * Math.PI * 2
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const theme = document.body.classList;
+        const color = theme.contains('theme-green')
+            ? '#83cba1'
+            : '#f2a2c8';
+
+        ctx.fillStyle = color;
+
+        petals.forEach(p => {
+            p.y += p.speed;
+            p.x += p.drift;
+            p.rotation += 0.008;
+
+            if (p.y > canvas.height + 20) {
+                p.y = -20;
+                p.x = Math.random() * canvas.width;
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.globalAlpha = 0.35;
+
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size / 2, p.size, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        animate();
+    }
+</script>
+
+</body>
+</html>

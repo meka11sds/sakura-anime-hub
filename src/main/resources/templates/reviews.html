@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отзывы | Sakura Anime Hub</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #17151e;
+            color: #f5f1f7;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #282431;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+        }
+
+        input, textarea, button {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+        }
+
+        input, textarea {
+            background: #393442;
+            color: white;
+            border: 1px solid #60576b;
+        }
+
+        textarea {
+            display: block;
+            width: 95%;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            background: #e8a4c4;
+            color: #17151e;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #f5bed8;
+        }
+
+        a {
+            color: #e8a4c4;
+        }
+
+        summary {
+            cursor: pointer;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🌸 Отзывы об аниме</h1>
+
+<a th:href="@{/movie-details(id=${showId})}">
+    ← Назад к аниме
+</a>
+
+<!-- ДОБАВЛЕНИЕ ОТЗЫВА -->
+<div class="card">
+
+    <h2>Написать отзыв</h2>
+
+    <form th:action="@{/reviews/add}" method="post">
+
+        <input type="hidden"
+               name="showId"
+               th:value="${showId}">
+
+        <label>Оценка от 1 до 10:</label>
+
+        <input type="number"
+               name="rating"
+               min="1"
+               max="10"
+               required>
+
+        <textarea name="comment"
+                  maxlength="1000"
+                  placeholder="Ваш отзыв"></textarea>
+
+        <button type="submit">
+            Опубликовать
+        </button>
+
+    </form>
+
+</div>
+
+<!-- СПИСОК ОТЗЫВОВ -->
+<h2>Отзывы пользователей</h2>
+
+<p th:if="${#lists.isEmpty(reviews)}">
+    Пока отзывов нет.
+</p>
+
+<div class="card" th:each="review : ${reviews}">
+
+    <h3 th:text="${review.user.username}">
+        Пользователь
+    </h3>
+
+    <p>
+        Оценка:
+        <strong th:text="${review.rating}">10</strong>/10
+    </p>
+
+    <p th:text="${review.comment}">
+        Текст отзыва
+    </p>
+
+    <!-- РЕДАКТИРОВАНИЕ: ТОЛЬКО АВТОР -->
+    <details th:if="${review.user.username == currentUsername}">
+
+        <summary>Редактировать отзыв</summary>
+
+        <form th:action="@{/reviews/update}"
+              method="post">
+
+            <input type="hidden"
+                   name="id"
+                   th:value="${review.id}">
+
+            <input type="hidden"
+                   name="showId"
+                   th:value="${showId}">
+
+            <label>Новая оценка:</label>
+
+            <input type="number"
+                   name="rating"
+                   min="1"
+                   max="10"
+                   th:value="${review.rating}"
+                   required>
+
+            <textarea name="comment"
+                      maxlength="1000"
+                      th:text="${review.comment}"></textarea>
+
+            <button type="submit">
+                Сохранить изменения
+            </button>
+
+        </form>
+
+    </details>
+
+    <!-- УДАЛЕНИЕ: ТОЛЬКО АВТОР -->
+    <form th:if="${review.user.username == currentUsername}"
+          th:action="@{/reviews/delete}"
+          method="post">
+
+        <input type="hidden"
+               name="id"
+               th:value="${review.id}">
+
+        <input type="hidden"
+               name="showId"
+               th:value="${showId}">
+
+        <button type="submit">
+            Удалить отзыв
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
+

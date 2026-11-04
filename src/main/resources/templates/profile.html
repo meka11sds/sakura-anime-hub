@@ -1,0 +1,513 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile & Settings | Sakura</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg: #120b13;
+            --panel: #211424;
+            --card: #2a1a2d;
+            --text: #ffe3eb;
+            --muted: #bda6b9;
+            --accent: #eb4aa3;
+            --accent2: #a92de0;
+            --border: #493047;
+            --input: #2c1e30;
+        }
+
+        body.theme-light {
+            --bg: #fff1f6;
+            --panel: #fff9fc;
+            --card: #ffffff;
+            --text: #503449;
+            --muted: #93768a;
+            --accent: #d779a7;
+            --accent2: #c58acb;
+            --border: #efd0df;
+            --input: #fff7fa;
+        }
+
+        body.theme-green {
+            --bg: #eaf5ed;
+            --panel: #f7fcf8;
+            --card: #ffffff;
+            --text: #244733;
+            --muted: #668875;
+            --accent: #398e61;
+            --accent2: #6ab78a;
+            --border: #c6dfce;
+            --input: #f0f8f2;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background .3s, color .3s;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        #sakura-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .site-header {
+            position: relative;
+            z-index: 2;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            font-size: 23px;
+        }
+
+        .brand-name {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .brand-subtitle {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--muted);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 11px 17px;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .nav-link:hover { border-color: var(--accent); }
+
+        .nav-primary {
+            background: linear-gradient(110deg, var(--accent), var(--accent2));
+            color: white;
+            border: none;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: auto;
+            padding: 55px 20px 80px;
+        }
+
+        .profile-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.1);
+        }
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .avatar {
+            width: 75px;
+            height: 75px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            font-size: 30px;
+        }
+
+        .profile-top h1 {
+            margin: 0 0 8px;
+            font-size: 27px;
+        }
+
+        .profile-top p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        .section {
+            padding-top: 30px;
+        }
+
+        .section h2 {
+            font-size: 17px;
+            margin: 0 0 8px;
+        }
+
+        .section-description {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .theme-option {
+            padding: 18px 10px;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            transition: transform .2s, border-color .2s;
+        }
+
+        .theme-option:hover { transform: translateY(-3px); }
+        .theme-option.active { border-color: var(--accent); }
+
+        .theme-option.dark {
+            background: #211424;
+            color: #ffe3eb;
+        }
+
+        .theme-option.light {
+            background: #fff1f6;
+            color: #503449;
+        }
+
+        .theme-option.green {
+            background: #eaf5ed;
+            color: #244733;
+        }
+
+        .theme-preview {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 21px;
+        }
+
+        .dark .theme-preview { background: #503050; }
+        .light .theme-preview { background: #f7c7dd; }
+        .green .theme-preview { background: #b9e2c7; }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            margin-top: 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .menu-link:hover { border-color: var(--accent); }
+
+        .signout-button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(110deg, var(--accent), var(--accent2));
+            color: white;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .danger-zone {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .danger-zone p {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 25px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media(max-width: 600px) {
+            .header-inner { justify-content: center; }
+            .profile-card { padding: 22px; }
+            .theme-grid { gap: 7px; }
+            .theme-option { font-size: 10px; padding: 15px 5px; }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+            #sakura-canvas { display: none; }
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+
+<canvas id="sakura-canvas"></canvas>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a href="/search-page" class="brand">
+            <div class="brand-icon">🌸</div>
+            <div>
+                <div class="brand-name">SAKURA</div>
+                <div class="brand-subtitle">ANIME & MOVIE HUB</div>
+            </div>
+        </a>
+
+        <nav>
+            <a href="/search-page" class="nav-link">⌕ Search</a>
+            <a href="/watchlist" class="nav-link nav-primary">♡ My Watchlist</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div class="profile-card">
+
+        <div class="profile-top">
+            <div class="avatar">👤</div>
+            <div>
+                <h1 th:text="${username}">Username</h1>
+                <p>ACCOUNT & SETTINGS</p>
+            </div>
+        </div>
+
+        <section class="section">
+            <h2>🎨 Interface Theme</h2>
+            <p class="section-description">
+                Choose your favorite Sakura style.
+                Your theme will be saved across pages.
+            </p>
+
+            <div class="theme-grid">
+                <button type="button"
+                        class="theme-option dark"
+                        data-theme="theme-dark"
+                        onclick="setTheme('theme-dark')">
+                    <span class="theme-preview">🌙</span>
+                    Dark Sakura
+                </button>
+
+                <button type="button"
+                        class="theme-option light"
+                        data-theme="theme-light"
+                        onclick="setTheme('theme-light')">
+                    <span class="theme-preview">🌸</span>
+                    Light Sakura
+                </button>
+
+                <button type="button"
+                        class="theme-option green"
+                        data-theme="theme-green"
+                        onclick="setTheme('theme-green')">
+                    <span class="theme-preview">🌿</span>
+                    Green Sakura
+                </button>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Navigation</h2>
+
+            <a href="/search-page" class="menu-link">
+                <span>🔍 Search Catalog</span>
+                <span>→</span>
+            </a>
+
+            <a href="/watchlist" class="menu-link">
+                <span>♡ My Watchlist</span>
+                <span>→</span>
+            </a>
+        </section>
+
+        <form th:action="@{/logout}" method="post">
+            <button class="signout-button" type="submit">
+                Sign Out
+            </button>
+        </form>
+
+    </div>
+</main>
+
+<footer>Sakura Anime Hub © 2026</footer>
+
+<script>
+    const validThemes = ['theme-dark', 'theme-light', 'theme-green'];
+
+    function setTheme(theme) {
+        if (!validThemes.includes(theme)) {
+            theme = 'theme-dark';
+        }
+
+        document.body.classList.remove(...validThemes);
+        document.body.classList.add(theme);
+
+        localStorage.setItem('sakura_theme', theme);
+
+        document.querySelectorAll('.theme-option').forEach(button => {
+            const active = button.dataset.theme === theme;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-pressed', String(active));
+        });
+    }
+
+    function restoreTheme() {
+        let saved = localStorage.getItem('sakura_theme');
+
+        if (!saved) {
+            const old = localStorage.getItem('sakuraTheme');
+            saved = old ? 'theme-' + old : 'theme-dark';
+        }
+
+        setTheme(saved);
+    }
+
+    restoreTheme();
+
+    window.addEventListener('storage', event => {
+        if (event.key === 'sakura_theme') {
+            setTheme(event.newValue || 'theme-dark');
+        }
+    });
+
+    const canvas = document.getElementById('sakura-canvas');
+    const ctx = canvas.getContext('2d');
+    const petals = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 28; i++) {
+        petals.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 5 + 4,
+            speed: Math.random() * 0.8 + 0.3,
+            drift: Math.random() * 0.8 - 0.4,
+            rotation: Math.random() * Math.PI * 2
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = document.body.classList.contains('theme-green')
+            ? '#83cba1'
+            : '#f2a2c8';
+
+        petals.forEach(p => {
+            p.y += p.speed;
+            p.x += p.drift;
+            p.rotation += 0.008;
+
+            if (p.y > canvas.height + 20) {
+                p.y = -20;
+                p.x = Math.random() * canvas.width;
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.globalAlpha = 0.35;
+
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size / 2, p.size, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        animate();
+    }
+</script>
+
+</body>
+</html>
